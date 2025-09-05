@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Study Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .upload-container {
+            padding: 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+        
+        p {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .file-input-container {
+            position: relative;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .file-input {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 30px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .file-input-label:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.5);
+        }
+        
+        .file-input-label svg {
+            margin-right: 10px;
+        }
+        
+        .card {
+            padding: 40px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            display: none;
+        }
+        
+        .question {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+        
+        .answers {
+            padding-left: 20px;
+        }
+        
+        .answer {
+            font-size: 20px;
+            color: #34495e;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            padding-left: 10px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 40px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eaeaea;
+            display: none;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        #prev-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #next-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .progress {
+            text-align: center;
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            display: none;
+        }
+        
+        .card-number {
+            text-align: center;
+            font-size: 16px;
+            color: #95a5a6;
+            margin-top: 20px;
+        }
+        
+        .error {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .card {
+                padding: 30px 20px;
+                min-height: 400px;
+            }
+            
+            .question {
+                font-size: 24px;
+            }
+            
+            .answer {
+                font-size: 18px;
+            }
+            
+            button {
+                padding: 10px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px 15px;
+                min-height: 350px;
+            }
+            
+            .question {
+                font-size: 20px;
+            }
+            
+            .answer {
+                font-size: 16px;
+            }
+            
+            .navigation {
+                padding: 15px;
+            }
+            
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .upload-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="upload-container" id="upload-container">
+            <h1>JSON Study Cards</h1>
+            <p>Upload a JSON file with your study questions and answers. The JSON should be an array of objects with "question" and "answers" properties.</p>
+            
+            <div class="file-input-container">
+                <input type="file" id="json-file" class="file-input" accept=".json">
+                <label for="json-file" class="file-input-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Choose JSON File
+                </label>
+            </div>
+            
+            <div class="error" id="error-message"></div>
+        </div>
+        
+        <div class="progress" id="progress">
+            Card <span id="current">1</span> of <span id="total">0</span>
+        </div>
+        
+        <div class="card" id="card">
+            <div class="question" id="question"></div>
+            <div class="answers" id="answers"></div>
+            <div class="card-number">Flip cards with keyboard arrows ← →</div>
+        </div>
+        
+        <div class="navigation" id="navigation">
+            <button id="prev-btn" disabled>Previous</button>
+            <button id="next-btn" disabled>Next</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const uploadContainer = document.getElementById('upload-container');
+        const fileInput = document.getElementById('json-file');
+        const errorMessage = document.getElementById('error-message');
+        const progressElement = document.getElementById('progress');
+        const currentElement = document.getElementById('current');
+        const totalElement = document.getElementById('total');
+        const cardElement = document.getElementById('card');
+        const questionElement = document.getElementById('question');
+        const answersElement = document.getElementById('answers');
+        const navigationElement = document.getElementById('navigation');
+        const prevButton = document.getElementById('prev-btn');
+        const nextButton = document.getElementById('next-btn');
+
+        let studyData = [];
+        let currentCardIndex = 0;
+
+        // Handle file selection
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    
+                    // Validate JSON structure
+                    if (!Array.isArray(jsonData)) {
+                        throw new Error('JSON should be an array');
+                    }
+                    
+                    // Process the data
+                    studyData = jsonData.map(item => {
+                        // Handle different possible JSON structures
+                        if (typeof item === 'string') {
+                            // If it's a string array, use the first string as question and rest as answers
+                            return {
+                                question: item,
+                                answers: []
+                            };
+                        } else if (Array.isArray(item)) {
+                            // If it's an array, use the first item as question and rest as answers
+                            return {
+                                question: item[0],
+                                answers: item.slice(1)
+                            };
+                        } else if (typeof item === 'object' && item !== null) {
+                            // If it's an object, try to extract question and answers
+                            return {
+                                question: item.question || item.Question || '',
+                                answers: item.answers || item.Answers || item.options || []
+                            };
+                        } else {
+                            return {
+                                question: String(item),
+                                answers: []
+                            };
+                        }
+                    }).filter(item => item.question); // Filter out items without questions
+                    
+                    if (studyData.length === 0) {
+                        throw new Error('No valid study cards found in the JSON file');
+                    }
+                    
+                    // Hide upload section and show study interface
+                    uploadContainer.style.display = 'none';
+                    progressElement.style.display = 'block';
+                    cardElement.style.display = 'flex';
+                    navigationElement.style.display = 'flex';
+                    
+                    // Initialize the study interface
+                    totalElement.textContent = studyData.length;
+                    displayCard(currentCardIndex);
+                    
+                } catch (error) {
+                    showError('Invalid JSON file: ' + error.message);
+                }
+            };
+            
+            reader.onerror = function() {
+                showError('Error reading file');
+            };
+            
+            reader.readAsText(file);
+        });
+
+        // Function to display the current card
+        function displayCard(index) {
+            const card = studyData[index];
+            questionElement.textContent = card.question;
+            
+            // Clear previous answers
+            answersElement.innerHTML = '';
+            
+            // Add each answer
+            if (card.answers && card.answers.length > 0) {
+                card.answers.forEach(answer => {
+                    const answerElement = document.createElement('div');
+                    answerElement.classList.add('answer');
+                    answerElement.textContent = answer;
+                    answersElement.appendChild(answerElement);
+                });
+            } else {
+                const noAnswerElement = document.createElement('div');
+                noAnswerElement.classList.add('answer');
+                noAnswerElement.textContent = "No answers provided in the data";
+                noAnswerElement.style.color = '#95a5a6';
+                noAnswerElement.style.fontStyle = 'italic';
+                answersElement.appendChild(noAnswerElement);
+            }
+            
+            // Update progress indicator
+            currentElement.textContent = index + 1;
+            
+            // Update button states
+            prevButton.disabled = index === 0;
+            nextButton.disabled = index === studyData.length - 1;
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // Hide error after 5 seconds
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Event listeners for buttons
+        prevButton.addEventListener('click', () => {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                displayCard(currentCardIndex);
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentCardIndex < studyData.length - 1) {
+                currentCardIndex++;
+                displayCard(currentCardIndex);
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (studyData.length === 0) return;
+            
+            if (e.key === 'ArrowLeft' && currentCardIndex > 0) {
+                currentCardIndex--;
+                displayCard(currentCardIndex);
+            } else if (e.key === 'ArrowRight' && currentCardIndex < studyData.length - 1) {
+                currentCardIndex++;
+                displayCard(currentCardIndex);
+            }
+        });
+    </script>
+</body>
+</html>

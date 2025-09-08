@@ -409,7 +409,9 @@
             }
 
             const currentCard = studyData[currentCardIndex];
+            console.log("antesdelasuma")
             const wordCount = countWords(currentCard.question) + countWords(currentCard.answer);
+            console.log("llego")
             console.log(wordcount)
             const delay = getAutoAdvanceDelay(wordCount);
 

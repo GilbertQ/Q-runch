@@ -388,11 +388,11 @@
         // Function to get auto-advance delay based on word count
         function getAutoAdvanceDelay(wordCount) {
             if (wordCount < 21) {
-                return 7000; // 4 seconds
+                return 4000; // 4 seconds
             } else if (wordCount <= 50) {
-                return 10000; // 7 seconds
+                return 7000; // 7 seconds
             } else {
-                return 15000; // 10 seconds
+                return 10000; // 10 seconds
             }
         }
 
@@ -409,7 +409,7 @@
             }
 
             const currentCard = studyData[currentCardIndex];
-            const wordCount = countWords(currentCard.question);
+            const wordCount = countWords(currentCard.question)+countWords(currentCard.answer);
             const delay = getAutoAdvanceDelay(wordCount);
 
             autoAdvanceTimer = setTimeout(() => {

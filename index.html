@@ -290,7 +290,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         // DOM elements
         const uploadContainer = document.getElementById('upload-container');
         const fileInput = document.getElementById('json-file');
@@ -307,7 +307,7 @@
 
         let studyData = [];
         let currentCardIndex = 0;
-        let autoAdvanceTimer = null; // Timer for auto-advance
+        let autoAdvanceTimeout = null; // Store timeout reference for clearing
 
         // Handle file selection
         fileInput.addEventListener('change', function(event) {
@@ -380,53 +380,48 @@
             reader.readAsText(file);
         });
 
-        // Function to count words in a text
+        // Function to count words in a string
         function countWords(text) {
             return text.trim().split(/\s+/).filter(word => word.length > 0).length;
         }
 
-        // Function to get auto-advance delay based on word count
-        function getAutoAdvanceDelay(wordCount) {
-            if (wordCount < 21) {
-                return 4000; // 4 seconds
-            } else if (wordCount <= 50) {
-                return 7000; // 7 seconds
-            } else {
-                return 15000; // 10 seconds
-            }
-        }
-
-        // Function to start auto-advance timer
-        function startAutoAdvanceTimer() {
-            // Clear any existing timer
-            if (autoAdvanceTimer) {
-                clearTimeout(autoAdvanceTimer);
+        // Function to set up auto-advance based on word count
+        function setupAutoAdvance() {
+            // Clear any existing timeout
+            if (autoAdvanceTimeout) {
+                clearTimeout(autoAdvanceTimeout);
+                autoAdvanceTimeout = null;
             }
 
-            // Don't start timer if we're on the last card
-            if (currentCardIndex >= studyData.length - 1) {
-                return;
-            }
-
-            const currentCard = studyData[currentCardIndex];
-            const wordCount = countWords(currentCard.question)
-            console.log(wordcount);
-            console.log(currentCardIndex);
-            const delay = getAutoAdvanceDelay(wordCount);
-
-            autoAdvanceTimer = setTimeout(() => {
-                if (currentCardIndex < studyData.length - 1) {
-                    currentCardIndex++;
-                    displayCard(currentCardIndex);
+            // Only set up auto-advance if we're not on the last card
+            if (currentCardIndex < studyData.length - 1) {
+                const currentCard = studyData[currentCardIndex];
+                
+                // Count words in question
+                let totalWordCount = countWords(currentCard.question);
+                
+                // Add words from all answers
+                if (currentCard.answers && currentCard.answers.length > 0) {
+                    currentCard.answers.forEach(answer => {
+                        totalWordCount += countWords(answer);
+                    });
                 }
-            }, delay);
-        }
+                
+                let delay;
+                if (totalWordCount < 21) {
+                    delay = 4000; // 4 seconds
+                } else if (totalWordCount <= 50) {
+                    delay = 7000; // 7 seconds
+                } else {
+                    delay = 10000; // 10 seconds
+                }
 
-        // Function to stop auto-advance timer
-        function stopAutoAdvanceTimer() {
-            if (autoAdvanceTimer) {
-                clearTimeout(autoAdvanceTimer);
-                autoAdvanceTimer = null;
+                autoAdvanceTimeout = setTimeout(() => {
+                    if (currentCardIndex < studyData.length - 1) {
+                        currentCardIndex++;
+                        displayCard(currentCardIndex);
+                    }
+                }, delay);
             }
         }
 
@@ -461,9 +456,9 @@
             // Update button states
             prevButton.disabled = index === 0;
             nextButton.disabled = index === studyData.length - 1;
-
-            // Start auto-advance timer for this card
-            startAutoAdvanceTimer();
+            
+            // Set up auto-advance for the new card
+            setupAutoAdvance();
         }
 
         // Show error message
@@ -480,7 +475,6 @@
         // Event listeners for buttons
         prevButton.addEventListener('click', () => {
             if (currentCardIndex > 0) {
-                stopAutoAdvanceTimer(); // Stop auto-advance when user manually navigates
                 currentCardIndex--;
                 displayCard(currentCardIndex);
             }
@@ -488,7 +482,6 @@
 
         nextButton.addEventListener('click', () => {
             if (currentCardIndex < studyData.length - 1) {
-                stopAutoAdvanceTimer(); // Stop auto-advance when user manually navigates
                 currentCardIndex++;
                 displayCard(currentCardIndex);
             }
@@ -499,30 +492,11 @@
             if (studyData.length === 0) return;
             
             if (e.key === 'ArrowLeft' && currentCardIndex > 0) {
-                stopAutoAdvanceTimer(); // Stop auto-advance when user manually navigates
                 currentCardIndex--;
                 displayCard(currentCardIndex);
             } else if (e.key === 'ArrowRight' && currentCardIndex < studyData.length - 1) {
-                stopAutoAdvanceTimer(); // Stop auto-advance when user manually navigates
                 currentCardIndex++;
                 displayCard(currentCardIndex);
-            }
-        });
-
-        // Stop auto-advance timer when user interacts with the page
-        document.addEventListener('click', () => {
-            if (studyData.length > 0) {
-                stopAutoAdvanceTimer();
-                startAutoAdvanceTimer(); // Restart the timer
-            }
-        });
-
-        // Handle page visibility change (stop timer when tab is not active)
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stopAutoAdvanceTimer();
-            } else if (studyData.length > 0) {
-                startAutoAdvanceTimer();
             }
         });
     </script>

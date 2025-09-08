@@ -410,7 +410,8 @@
 
             const currentCard = studyData[currentCardIndex];
             const wordCount = countWords(currentCard.question)
-            console.log(wordcount)
+            console.log(wordcount);
+            console.log(currentCardIndex);
             const delay = getAutoAdvanceDelay(wordCount);
 
             autoAdvanceTimer = setTimeout(() => {

@@ -442,14 +442,15 @@
                     });
                 }
                 
-                let delay;
-                if (totalWordCount < 21) {
-                    delay = 4000; // 4 seconds
-                } else if (totalWordCount <= 50) {
-                    delay = 7000; // 7 seconds
-                } else {
-                    delay = 10000; // 10 seconds
-                }
+                let delay = Math.max(2000, Math.ceil(totalWordCount / 4) * 1000);
+                //let delay;
+                //if (totalWordCount < 21) {
+                //    delay = 4000; // 4 seconds
+                //} else if (totalWordCount <= 50) {
+                //    delay = 7000; // 7 seconds
+                //} else {
+                //    delay = 10000; // 10 seconds
+               // }
 
                 autoAdvanceTimeout = setTimeout(() => {
                     if (currentCardIndex < studyData.length - 1) {

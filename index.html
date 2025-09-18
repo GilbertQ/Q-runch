@@ -355,13 +355,13 @@
     // Process the data
 studyData = jsonData.map(item => {
     if (Array.isArray(item) && item.length >= 8) {
-        // Parse the array structure
+        const answerIdx = item.findIndex(line => typeof line === "string" && line.startsWith("Answer:"));
         return {
             question: item[0],
-            options: item.slice(1, 6), // A. ... to E. ...
-            answer: item[6],           // "Answer: ..."
-            explanation: item[7],      // "Explanation"
-            source: item[8] || ""      // "by the book" (optional)
+            options: item.slice(1, answerIdx), // All options before "Answer:"
+            answer: item[answerIdx],           // "Answer: ..."
+            explanation: item[answerIdx + 1],  // "Explanation"
+            source: item[answerIdx + 2] || ""  // "by the book" (optional)
         };
     } else {
         // fallback for other structures

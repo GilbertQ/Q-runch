@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Study Cards</title>
+    <title>Q-runch</title>
     <style>
         * {
             margin: 0;
@@ -353,33 +353,27 @@
     }
 
     // Process the data
-    studyData = jsonData.map(item => {
-        // Handle different possible JSON structures
-        if (typeof item === 'string') {
-            // If it's a string array, use the first string as question and rest as answers
-            return {
-                question: item,
-                answers: []
-            };
-        } else if (Array.isArray(item)) {
-            // If it's an array, use the first item as question and rest as answers
-            return {
-                question: item[0],
-                answers: item.slice(1)
-            };
-        } else if (typeof item === 'object' && item !== null) {
-            // If it's an object, try to extract question and answers
-            return {
-                question: item.question || item.Question || '',
-                answers: item.answers || item.Answers || item.options || []
-            };
-        } else {
-            return {
-                question: String(item),
-                answers: []
-            };
-        }
-    }).filter(item => item.question); // Filter out items without questions
+studyData = jsonData.map(item => {
+    if (Array.isArray(item) && item.length >= 8) {
+        // Parse the array structure
+        return {
+            question: item[0],
+            options: item.slice(1, 6), // A. ... to E. ...
+            answer: item[6],           // "Answer: ..."
+            explanation: item[7],      // "Explanation"
+            source: item[8] || ""      // "by the book" (optional)
+        };
+    } else {
+        // fallback for other structures
+        return {
+            question: item.question || item.Question || '',
+            options: item.options || [],
+            answer: item.answer || '',
+            explanation: item.explanation || '',
+            source: item.source || ''
+        };
+    }
+}).filter(item => item.question);
 
     if (studyData.length === 0) {
         throw new Error('No valid study cards found in the file');
@@ -463,39 +457,62 @@
 
         // Function to display the current card
         function displayCard(index) {
-            const card = studyData[index];
-            questionElement.textContent = card.question;
-            
-            // Clear previous answers
-            answersElement.innerHTML = '';
-            
-            // Add each answer
-            if (card.answers && card.answers.length > 0) {
-                card.answers.forEach(answer => {
-                    const answerElement = document.createElement('div');
-                    answerElement.classList.add('answer');
-                    answerElement.textContent = answer;
-                    answersElement.appendChild(answerElement);
-                });
-            } else {
-                const noAnswerElement = document.createElement('div');
-                noAnswerElement.classList.add('answer');
-                noAnswerElement.textContent = "No answers was provided in the data";
-                noAnswerElement.style.color = '#95a5a6';
-                noAnswerElement.style.fontStyle = 'italic';
-                answersElement.appendChild(noAnswerElement);
-            }
-            
-            // Update progress indicator
-            currentElement.textContent = index + 1;
-            
-            // Update button states
-            prevButton.disabled = index === 0;
-            nextButton.disabled = index === studyData.length - 1;
-            
-            // Set up auto-advance for the new card
-            setupAutoAdvance();
-        }
+    const card = studyData[index];
+    questionElement.textContent = card.question;
+
+    // Clear previous answers
+    answersElement.innerHTML = '';
+
+    // Show options
+    if (card.options && card.options.length > 0) {
+        card.options.forEach(option => {
+            const optionElement = document.createElement('div');
+            optionElement.classList.add('answer');
+            optionElement.textContent = option;
+            answersElement.appendChild(optionElement);
+        });
+    }
+
+    // Show answer
+    if (card.answer) {
+        const answerElement = document.createElement('div');
+        answerElement.classList.add('answer');
+        answerElement.style.fontWeight = 'bold';
+        answerElement.style.color = '#2ecc71';
+        answerElement.textContent = card.answer;
+        answersElement.appendChild(answerElement);
+    }
+
+    // Show explanation
+    if (card.explanation) {
+        const explanationElement = document.createElement('div');
+        explanationElement.classList.add('answer');
+        explanationElement.style.fontStyle = 'italic';
+        explanationElement.style.color = '#2980b9';
+        explanationElement.textContent = card.explanation;
+        answersElement.appendChild(explanationElement);
+    }
+
+    // Show source
+    if (card.source) {
+        const sourceElement = document.createElement('div');
+        sourceElement.classList.add('answer');
+        sourceElement.style.color = '#8e44ad';
+        sourceElement.textContent = card.source;
+        answersElement.appendChild(sourceElement);
+    }
+
+    // Update progress indicator
+    currentElement.textContent = index + 1;
+
+    // Update button states
+    prevButton.disabled = index === 0;
+    nextButton.disabled = index === studyData.length - 1;
+
+    // Set up auto-advance for the new card
+    setupAutoAdvance();
+}	
+
 
         // Show error message
         function showError(message) {

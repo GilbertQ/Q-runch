@@ -456,50 +456,32 @@ studyData = jsonData.map(item => {
         }
 
         // Function to display the current card
-        function displayCard(index) {
+    function displayCard(index) {
     const card = studyData[index];
     questionElement.textContent = card.question;
 
     // Clear previous answers
     answersElement.innerHTML = '';
 
-    // Show options
-    if (card.options && card.options.length > 0) {
-        card.options.forEach(option => {
-            const optionElement = document.createElement('div');
-            optionElement.classList.add('answer');
-            optionElement.textContent = option;
-            answersElement.appendChild(optionElement);
+    // Extract correct answer letters (e.g., ["B", "D"])
+    let correctLetters = [];
+    if (card.answer && card.answer.startsWith("Answer:")) {
+        correctLetters = card.answer.match(/[A-E]/g) || [];
+    }
+
+    // Find and display the correct option(s)
+    if (card.options && correctLetters.length > 0) {
+        correctLetters.forEach(letter => {
+            const option = card.options.find(opt => opt.trim().startsWith(letter + "."));
+            if (option) {
+                const answerElement = document.createElement('div');
+                answerElement.classList.add('answer');
+                answerElement.style.fontWeight = 'bold';
+                answerElement.style.color = '#2ecc71';
+                answerElement.textContent = option;
+                answersElement.appendChild(answerElement);
+            }
         });
-    }
-
-    // Show answer
-    if (card.answer) {
-        const answerElement = document.createElement('div');
-        answerElement.classList.add('answer');
-        answerElement.style.fontWeight = 'bold';
-        answerElement.style.color = '#2ecc71';
-        answerElement.textContent = card.answer;
-        answersElement.appendChild(answerElement);
-    }
-
-    // Show explanation
-    if (card.explanation) {
-        const explanationElement = document.createElement('div');
-        explanationElement.classList.add('answer');
-        explanationElement.style.fontStyle = 'italic';
-        explanationElement.style.color = '#2980b9';
-        explanationElement.textContent = card.explanation;
-        answersElement.appendChild(explanationElement);
-    }
-
-    // Show source
-    if (card.source) {
-        const sourceElement = document.createElement('div');
-        sourceElement.classList.add('answer');
-        sourceElement.style.color = '#8e44ad';
-        sourceElement.textContent = card.source;
-        answersElement.appendChild(sourceElement);
     }
 
     // Update progress indicator

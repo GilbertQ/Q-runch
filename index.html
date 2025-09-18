@@ -381,11 +381,11 @@ studyData = jsonData.map(item => {
 
     // Sort studyData by total word count (question + answers)
     studyData.sort((a, b) => {
-        const countWords = (str) => str.split(/\s+/).filter(word => word.length > 0).length;
-        const aWords = countWords(a.question) + a.answers.reduce((sum, ans) => sum + countWords(ans), 0);
-        const bWords = countWords(b.question) + b.answers.reduce((sum, ans) => sum + countWords(ans), 0);
-        return aWords - bWords; // Ascending order
-    });
+    const countWords = (str) => str.split(/\s+/).filter(word => word.length > 0).length;
+    const aWords = countWords(a.question) + (a.options ? a.options.reduce((sum, opt) => sum + countWords(opt), 0) : 0);
+    const bWords = countWords(b.question) + (b.options ? b.options.reduce((sum, opt) => sum + countWords(opt), 0) : 0);
+    return aWords - bWords; // Ascending order
+});
 
     // Hide upload section and show study interface
     uploadContainer.style.display = 'none';
